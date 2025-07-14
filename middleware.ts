@@ -8,7 +8,6 @@ const defaultLocale = 'en';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Բացառում ենք համակարգային ֆայլերը (API, static)
     if (
         pathname.startsWith('/api') ||
         pathname.startsWith('/_next') ||
@@ -18,22 +17,19 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const pathnameIsMissingLocale = locales.every(
-        (locale) =>
-            !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    const missing = locales.every(
+        (loc) => !pathname.startsWith(`/${loc}/`) && pathname !== `/${loc}`
     );
 
-    if (pathnameIsMissingLocale) {
-        const locale = defaultLocale;
+    if (missing) {
         const url = request.nextUrl.clone();
-        url.pathname = `/${locale}${pathname}`;
+        url.pathname = `/${defaultLocale}${pathname}`;
         return NextResponse.redirect(url);
     }
 
     return NextResponse.next();
 }
 
-// Օգտագործում ենք միայն անհրաժեշտ մասերում
 export const config = {
     matcher: ['/((?!api|_next|.*\\..*).*)'],
 };
