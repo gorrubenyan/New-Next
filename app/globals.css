@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@layer base {
+
+
+    *{
+        @apply box-border m-0 p-0;
+    }
+
+    button {
+        @apply  p-1 border border-black cursor-pointer; /* կամ border-2 border-gray-500 և այլն */
+    }
+}
