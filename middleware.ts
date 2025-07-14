@@ -8,6 +8,7 @@ const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
+    console.log('Middleware pathname:', request.nextUrl.pathname);
 
     // Բացառում ենք API-ները և public ֆայլերը (.css, .js, .png, ...)
     const isPublicFile = /\.(.*)$/.test(pathname);
@@ -33,5 +34,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next|favicon.ico|.*\\..*).*)'],
+    matcher: ['/((?!api|_next|.*\\..*).*)'],
 };
+
