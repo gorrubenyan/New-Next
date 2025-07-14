@@ -1,3 +1,5 @@
+// middleware.ts
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -5,34 +7,31 @@ const locales = ['en', 'hy'];
 const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+    const pathname = request.nextUrl.pathname;
 
-    // Բացառում ենք API, static ֆայլերը, favicon և _next ռեսուրսները
-    if (
-        pathname.startsWith('/api') ||
-        pathname.startsWith('/_next') ||
-        pathname === '/favicon.ico' ||
-        pathname.match(/\.(\w+)$/) // static files like .js, .css, .png
-    ) {
+    // Բացառում ենք API-ները և public ֆայլերը (.css, .js, .png, ...)
+    const isPublicFile = /\.(.*)$/.test(pathname);
+    const isSpecial = pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname === '/favicon.ico';
+
+    if (isPublicFile || isSpecial) {
         return NextResponse.next();
     }
 
-    // Եթե URL-ում լեզու չկա՝ ավելացնենք defaultLocale
+    // Եթե ուղին չունի լեզվի փաթեթ՝ վերաուղորդիր
     const pathnameIsMissingLocale = locales.every(
-        (locale) =>
-            !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+        (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
     );
 
     if (pathnameIsMissingLocale) {
+        const locale = defaultLocale;
         const url = request.nextUrl.clone();
-        url.pathname = `/${defaultLocale}${pathname}`;
+        url.pathname = `/${locale}${pathname}`;
         return NextResponse.redirect(url);
     }
 
     return NextResponse.next();
 }
 
-// Vercel-safe matcher
 export const config = {
-    matcher: ['/((?!api|_next|.*\\..*).*)'],
+    matcher: ['/((?!api|_next|favicon.ico|.*\\..*).*)'],
 };
