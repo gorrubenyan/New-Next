@@ -15,13 +15,17 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // Ստուգում ենք՝ արդյոք արդեն ունի լեզվի փաթեթ
     const hasLocale = locales.some(
         (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
     );
 
     if (!hasLocale) {
         const url = request.nextUrl.clone();
-        url.pathname = `/${defaultLocale}${pathname}`;
+
+        // Ապահովում ենք, որ մի քանի / չլինի
+        url.pathname = `/${defaultLocale}${pathname}`.replace(/\/{2,}/g, '/');
+
         return NextResponse.redirect(url);
     }
 
