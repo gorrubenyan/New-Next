@@ -1,5 +1,3 @@
-// middleware.ts
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -7,26 +5,23 @@ const locales = ['en', 'hy'];
 const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
-    const pathname = request.nextUrl.pathname;
-    console.log('Middleware pathname:', request.nextUrl.pathname);
+    const { pathname } = request.nextUrl;
 
-    // Բացառում ենք API-ները և public ֆայլերը (.css, .js, .png, ...)
-    const isPublicFile = /\.(.*)$/.test(pathname);
-    const isSpecial = pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname === '/favicon.ico';
+    // Բացառում ենք ստատիկ ֆայլերը և հատուկ ուղիները
+    const isStaticFile = pathname.match(/\.(.*)$/);
+    const isApiOrNext = pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname === '/favicon.ico';
 
-    if (isPublicFile || isSpecial) {
+    if (isStaticFile || isApiOrNext) {
         return NextResponse.next();
     }
 
-    // Եթե ուղին չունի լեզվի փաթեթ՝ վերաուղորդիր
-    const pathnameIsMissingLocale = locales.every(
-        (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    const hasLocale = locales.some(
+        (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
     );
 
-    if (pathnameIsMissingLocale) {
-        const locale = defaultLocale;
+    if (!hasLocale) {
         const url = request.nextUrl.clone();
-        url.pathname = `/${locale}${pathname}`;
+        url.pathname = `/${defaultLocale}${pathname}`;
         return NextResponse.redirect(url);
     }
 
@@ -34,6 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next|.*\\..*).*)'],
+    matcher: ['/((?!_next|api|favicon.ico).*)'],
 };
-
