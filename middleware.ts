@@ -5,27 +5,24 @@ const locales = ['en', 'hy'];
 const defaultLocale = 'en';
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+    const pathname = request.nextUrl.pathname;
 
-    // Բացառում ենք ստատիկ ֆայլերը և հատուկ ուղիները
-    const isStaticFile = pathname.match(/\.(.*)$/);
-    const isApiOrNext = pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname === '/favicon.ico';
-
-    if (isStaticFile || isApiOrNext) {
+    if (
+        pathname.startsWith('/api') ||
+        pathname.startsWith('/_next') ||
+        pathname === '/favicon.ico' ||
+        pathname.match(/\.(.*)$/)
+    ) {
         return NextResponse.next();
     }
 
-    // Ստուգում ենք՝ արդյոք արդեն ունի լեզվի փաթեթ
     const hasLocale = locales.some(
         (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
     );
 
     if (!hasLocale) {
         const url = request.nextUrl.clone();
-
-        // Ապահովում ենք, որ մի քանի / չլինի
         url.pathname = `/${defaultLocale}${pathname}`.replace(/\/{2,}/g, '/');
-
         return NextResponse.redirect(url);
     }
 
