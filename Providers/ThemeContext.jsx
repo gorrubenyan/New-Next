@@ -9,14 +9,14 @@ const ThemeContext = createContext({
 });
 
 const getInitialTheme = () => {
-    if (typeof window !== "undefined") {
-        return window.localStorage.getItem("theme") || "light";
-    }
-    return "light"; // server side fallback
+    // if (typeof window !== "undefined") {
+    //     return window.localStorage.getItem("theme") || "light";
+    // }
+    // return "light"; // server side fallback
 };
 
 export const ThemeProvider = ({ children }) => {
-    const [darkMode, setDarkMode] = useState(getInitialTheme);
+    const [darkMode, setDarkMode] = useState(typeof window !== "undefined" ? (window.localStorage.getItem("theme")) : "light");
 
     useEffect(() => {
         document.documentElement.classList.toggle("dark", darkMode === "dark");
